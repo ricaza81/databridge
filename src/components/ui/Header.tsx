@@ -3,7 +3,11 @@
 import { useStore } from '@/store'
 import { cn } from '@/lib/utils'
 
-export function Header() {
+interface HeaderProps {
+  backendOk: boolean | null
+}
+
+export function Header({ backendOk }: HeaderProps) {
   const { analysisReady, files } = useStore()
 
   return (
