@@ -35,6 +35,22 @@ SESSIONS: dict[str, dict] = {}  # En prod: Redis
 
 app = FastAPI(title="DataBridge API", version="0.1.0")
 
+@app.get("/")
+async def root():
+    return {
+        "service": "DataBridge API",
+        "status": "running",
+        "version": "0.1.0"
+    }
+
+
+@app.get("/health")
+async def health():
+    return {
+        "status": "healthy",
+        "service": "DataBridge API"
+    }
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
