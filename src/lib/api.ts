@@ -1,5 +1,16 @@
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+// ─── Health ───────────────────────────────────────────────────────────────────
+
+export async function checkHealth(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API}/health`, { signal: AbortSignal.timeout(3000) })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
 // ─── Session ──────────────────────────────────────────────────────────────────
 
 export async function createSession(): Promise<{ session_id: string }> {

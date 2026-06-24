@@ -41,12 +41,14 @@ export default function DashboardPage() {
   useEffect(() => {
     if (analysisReady && !autoAnalyzed.current) {
       autoAnalyzed.current = true
-      // Mostrar modal para guardar si hay proyectos
       if (projects.length > 0) {
         setPendingFiles(files.map(f => f.name))
         setShowSaveModal(true)
       }
-      handleSend('Analiza los archivos que acabo de subir y dame el diagnóstico completo: fuentes detectadas, relaciones entre ellas, problemas de calidad y el modelo de integración propuesto.')
+      // Esperar 1.5s para que el análisis esté disponible en el backend
+      setTimeout(() => {
+        handleSend('Analiza brevemente los archivos que acabo de subir: cuántas fuentes son, cuántos registros tiene cada una y qué tipo de datos contienen. Al final pregúntame si quiero que te muestres el modelo de relaciones y esquema de integración entre ellas.')
+      }, 1500)
     }
   }, [analysisReady])
 
@@ -54,10 +56,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!activeDbSessionId || isStreaming || messages.length === 0) return
     const last = messages[messages.length - 1]
-    if (last.id === lastMsgId.current) return
+    if (last.id === lastMsgId.current || last.role !== 'assistant' || !last.content) return
     lastMsgId.current = last.id
     db.saveMessage(activeDbSessionId, last).catch(console.error)
-  }, [messages, isStreaming, activeDbSessionId])
+  }, [isStreaming, activeDbSessionId])
 
   const handleSend = useCallback(async (text: string) => {
     if (!sessionId || isStreaming) return
