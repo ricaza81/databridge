@@ -1,29 +1,16 @@
 'use client'
 
-import { FileSpreadsheet, Link2, AlertTriangle, ChevronRight } from 'lucide-react'
+import { FileSpreadsheet, Link2, AlertTriangle } from 'lucide-react'
 import { useStore } from '@/store'
 import { UploadZone } from '@/components/upload/UploadZone'
-import { cn, confidenceBorder, confidenceColor, severityColor, formatBytes } from '@/lib/utils'
-import { uploadFiles } from '@/lib/api'
-import { useSession } from '@/hooks/useSession'
+import { cn, confidenceBorder, confidenceColor, formatBytes } from '@/lib/utils'
 
-export function Sidebar() {
-  const { files, addFile, updateFileStatus, analysis, analysisReady } = useStore()
-  const { sessionId, startPolling } = useSession()
+interface SidebarProps {
+  onFiles: (files: File[]) => void
+}
 
-  async function handleFiles(incoming: File[]) {
-    if (!sessionId) return
-    for (const f of incoming) {
-      addFile({ name: f.name, size: f.size, status: 'uploading' })
-    }
-    try {
-      await uploadFiles(sessionId, incoming)
-      incoming.forEach((f) => updateFileStatus(f.name, 'ready'))
-      startPolling(sessionId)
-    } catch {
-      incoming.forEach((f) => updateFileStatus(f.name, 'error'))
-    }
-  }
+export function Sidebar({ onFiles }: SidebarProps) {
+  const { files, analysis, analysisReady } = useStore()
 
   const topRels = analysis?.relationships.slice(0, 6) ?? []
   const highIssues = analysis?.quality_issues.filter(i => i.severity === 'alta').slice(0, 4) ?? []
@@ -37,7 +24,7 @@ export function Sidebar() {
           <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 mb-2">
             Fuentes de datos
           </p>
-          <UploadZone onFiles={handleFiles} />
+          <UploadZone onFiles={onFiles} />
         </div>
 
         {/* Files list */}
@@ -60,9 +47,9 @@ export function Sidebar() {
                   'text-[10px] px-2 py-0.5 rounded-full font-medium flex-shrink-0',
                   f.status === 'ready' ? 'bg-emerald-500/15 text-emerald-400' :
                   f.status === 'error' ? 'bg-red-500/15 text-red-400' :
-                  'bg-amber-500/15 text-amber-400'
+                  'bg-amber-500/15 text-amber-400 animate-pulse'
                 )}>
-                  {f.status === 'ready' ? 'Listo' : f.status === 'error' ? 'Error' : '...'}
+                  {f.status === 'ready' ? 'Listo' : f.status === 'error' ? 'Error' : 'Subiendo...'}
                 </span>
               </div>
             ))}
