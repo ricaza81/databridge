@@ -11,13 +11,13 @@ export function Header({ backendOk }: HeaderProps) {
   const { analysisReady, files } = useStore()
 
   const statusColor = backendOk === null
-    ? 'bg-white/20'
+    ? 'bg-[var(--text-faint)]'
     : backendOk
     ? analysisReady
-      ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]'
+      ? 'bg-emerald-500 shadow-[0_0_6px_#34d399]'
       : files.length > 0
       ? 'bg-amber-400 animate-pulse'
-      : 'bg-emerald-400'
+      : 'bg-emerald-500'
     : 'bg-red-400'
 
   const statusLabel = backendOk === null
@@ -31,27 +31,30 @@ export function Header({ backendOk }: HeaderProps) {
     : 'Listo'
 
   return (
-    <header className="h-[52px] flex items-center gap-3 px-5 border-b border-white/[0.07] bg-[#13151a] flex-shrink-0">
+    <header
+      className="h-[52px] flex items-center gap-3 px-5 flex-shrink-0"
+      style={{ background: 'var(--bg-panel)', borderBottom: '1px solid var(--border)' }}
+    >
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-[14px]">
           ⚡
         </div>
-        <span className="text-[15px] font-semibold tracking-tight">
-          Data<span className="text-emerald-400">Bridge</span>
+        <span className="text-[15px] font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+          Data<span className="text-emerald-600">Bridge</span>
         </span>
       </div>
 
       <div className="ml-auto flex items-center gap-2">
         {files.length > 0 && backendOk && (
-          <span className="text-[11px] text-white/30">
+          <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
             {files.length} archivo{files.length > 1 ? 's' : ''}
           </span>
         )}
         <div className={cn('w-2 h-2 rounded-full transition-all', statusColor)} />
         <span className={cn(
           'text-[12px]',
-          backendOk === false ? 'text-red-400' : 'text-white/40'
-        )}>
+          backendOk === false ? 'text-red-500' : ''
+        )} style={backendOk !== false ? { color: 'var(--text-muted)' } : {}}>
           {statusLabel}
         </span>
       </div>

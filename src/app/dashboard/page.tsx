@@ -32,16 +32,13 @@ export default function DashboardPage() {
   const [pendingFiles, setPendingFiles] = useState<string[]>([])
   const lastMsgId = useRef<string | null>(null)
 
-  // Health check
   useEffect(() => {
     checkHealth().then(ok => setBackendOk(ok))
   }, [])
 
-  // Auto-analizar cuando el análisis esté listo
   useEffect(() => {
     if (analysisReady && !autoAnalyzed.current) {
       autoAnalyzed.current = true
-      // Mostrar modal para guardar si hay proyectos
       if (projects.length > 0) {
         setPendingFiles(files.map(f => f.name))
         setShowSaveModal(true)
@@ -50,7 +47,6 @@ export default function DashboardPage() {
     }
   }, [analysisReady])
 
-  // Guardar mensajes en Supabase cuando el streaming termina
   useEffect(() => {
     if (!activeDbSessionId || isStreaming || messages.length === 0) return
     const last = messages[messages.length - 1]
@@ -65,7 +61,6 @@ export default function DashboardPage() {
     const userMsg: ChatMessage = { id: uuidv4(), role: 'user', content: text, timestamp: new Date() }
     addMessage(userMsg)
 
-    // Guardar mensaje usuario si hay sesión activa
     if (activeDbSessionId) {
       db.saveMessage(activeDbSessionId, userMsg).catch(console.error)
     }
@@ -97,13 +92,11 @@ export default function DashboardPage() {
     setStreaming(false)
   }, [sessionId, isStreaming, activeDbSessionId])
 
-  // Guardar sesión en proyecto
   async function handleSaveSession(projectId: string, title: string) {
     if (!sessionId) return
     try {
       const dbSession = await db.createSession(projectId, title, sessionId)
       setActiveDbSessionId(dbSession.id)
-      // Guardar archivos y análisis
       await db.updateSession(dbSession.id, {
         files: files.map(f => ({ name: f.name, size: f.size })),
         analysis: analysis || undefined,
@@ -114,21 +107,18 @@ export default function DashboardPage() {
     }
   }
 
-  // Cargar sesión desde Supabase
   async function handleSelectSession(dbSessionId: string) {
     try {
       const session = await db.getSession(dbSessionId)
       setActiveDbSessionId(dbSessionId)
       clearMessages()
       clearFiles()
-      autoAnalyzed.current = true // No re-analizar
+      autoAnalyzed.current = true
       setAnalysisReady(false)
 
-      // Cargar mensajes
       const msgs = await db.getMessages(dbSessionId)
       setMessages(msgs)
 
-      // Restaurar análisis si existe
       if (session.analysis) {
         setAnalysis(session.analysis)
         setAnalysisReady(true)
@@ -138,7 +128,6 @@ export default function DashboardPage() {
     }
   }
 
-  // Nueva sesión
   function handleNewSession() {
     clearMessages()
     clearFiles()
@@ -164,17 +153,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0d0e11] text-white overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <Header backendOk={backendOk} />
       <div className="flex flex-1 overflow-hidden">
-        {/* Panel de proyectos */}
         <ProjectsPanel
           onSelectSession={handleSelectSession}
           onNewSession={handleNewSession}
         />
-        {/* Sidebar de datos */}
         <Sidebar onFiles={handleFiles} />
-        {/* Chat */}
         <section className="flex-1 flex flex-col overflow-hidden">
           <ChatWindow onSuggestion={handleSend} />
           <ChatInput
@@ -184,7 +170,6 @@ export default function DashboardPage() {
         </section>
       </div>
 
-      {/* Modal guardar sesión */}
       {showSaveModal && (
         <SaveSessionModal
           files={pendingFiles}

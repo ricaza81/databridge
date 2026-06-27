@@ -16,12 +16,15 @@ export function Sidebar({ onFiles }: SidebarProps) {
   const highIssues = analysis?.quality_issues.filter(i => i.severity === 'alta').slice(0, 4) ?? []
 
   return (
-    <aside className="w-[260px] flex-shrink-0 border-r border-white/[0.07] bg-[#13151a] flex flex-col overflow-y-auto">
+    <aside
+      className="w-[260px] flex-shrink-0 flex flex-col overflow-y-auto"
+      style={{ background: 'var(--bg-panel)', borderRight: '1px solid var(--border)' }}
+    >
       <div className="p-4 flex flex-col gap-5">
 
         {/* Upload */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 mb-2">
+          <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-faint)' }}>
             Fuentes de datos
           </p>
           <UploadZone onFiles={onFiles} />
@@ -30,24 +33,25 @@ export function Sidebar({ onFiles }: SidebarProps) {
         {/* Files list */}
         {files.length > 0 && (
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25">
+            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>
               Archivos ({files.length})
             </p>
             {files.map((f) => (
               <div
                 key={f.name}
-                className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.07] rounded-lg px-3 py-2"
+                className="flex items-center gap-2 rounded-lg px-3 py-2"
+                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
               >
-                <FileSpreadsheet size={14} className="text-white/40 flex-shrink-0" />
+                <FileSpreadsheet size={14} className="flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] text-white/80 truncate">{f.name}</p>
-                  <p className="text-[10px] text-white/30">{formatBytes(f.size)}</p>
+                  <p className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>{f.name}</p>
+                  <p className="text-[10px]" style={{ color: 'var(--text-faint)' }}>{formatBytes(f.size)}</p>
                 </div>
                 <span className={cn(
                   'text-[10px] px-2 py-0.5 rounded-full font-medium flex-shrink-0',
-                  f.status === 'ready' ? 'bg-emerald-500/15 text-emerald-400' :
-                  f.status === 'error' ? 'bg-red-500/15 text-red-400' :
-                  'bg-amber-500/15 text-amber-400 animate-pulse'
+                  f.status === 'ready' ? 'bg-emerald-100 text-emerald-700' :
+                  f.status === 'error' ? 'bg-red-100 text-red-600' :
+                  'bg-amber-100 text-amber-700 animate-pulse'
                 )}>
                   {f.status === 'ready' ? 'Listo' : f.status === 'error' ? 'Error' : 'Subiendo...'}
                 </span>
@@ -59,22 +63,28 @@ export function Sidebar({ onFiles }: SidebarProps) {
         {/* Sources summary */}
         {analysisReady && analysis && (
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25">
+            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>
               Fuentes analizadas
             </p>
             {analysis.sources.map((src) => (
-              <div key={src.name} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2.5">
-                <p className="text-[12px] font-medium text-white/80 truncate mb-1.5">{src.name}</p>
-                <div className="flex justify-between text-[11px] text-white/40 py-0.5">
-                  <span>Filas</span><span className="text-white/70 font-medium">{src.rows.toLocaleString()}</span>
+              <div
+                key={src.name}
+                className="rounded-lg px-3 py-2.5"
+                style={{ background: 'var(--bg-surface-alt)', border: '1px solid var(--border-subtle)' }}
+              >
+                <p className="text-[12px] font-medium truncate mb-1.5" style={{ color: 'var(--text-primary)' }}>{src.name}</p>
+                <div className="flex justify-between text-[11px] py-0.5">
+                  <span style={{ color: 'var(--text-muted)' }}>Filas</span>
+                  <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>{src.rows.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-[11px] text-white/40 py-0.5">
-                  <span>Columnas</span><span className="text-white/70 font-medium">{src.cols}</span>
+                <div className="flex justify-between text-[11px] py-0.5">
+                  <span style={{ color: 'var(--text-muted)' }}>Columnas</span>
+                  <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>{src.cols}</span>
                 </div>
                 {src.potential_keys.length > 0 && (
-                  <div className="flex justify-between text-[11px] text-white/40 py-0.5">
-                    <span>Llaves pot.</span>
-                    <span className="text-emerald-400 font-medium">{src.potential_keys.length}</span>
+                  <div className="flex justify-between text-[11px] py-0.5">
+                    <span style={{ color: 'var(--text-muted)' }}>Llaves pot.</span>
+                    <span className="text-emerald-600 font-medium">{src.potential_keys.length}</span>
                   </div>
                 )}
               </div>
@@ -85,21 +95,19 @@ export function Sidebar({ onFiles }: SidebarProps) {
         {/* Relationships */}
         {topRels.length > 0 && (
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 flex items-center gap-1">
+            <p className="text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1" style={{ color: 'var(--text-faint)' }}>
               <Link2 size={10} /> Relaciones ({analysis!.relationships.length})
             </p>
             {topRels.map((rel, i) => (
               <div
                 key={i}
-                className={cn(
-                  'border-l-2 pl-2.5 py-1.5 bg-white/[0.02] rounded-r-lg',
-                  confidenceBorder(rel.confidence)
-                )}
+                className={cn('border-l-2 pl-2.5 py-1.5 rounded-r-lg', confidenceBorder(rel.confidence))}
+                style={{ background: 'var(--bg-surface-alt)' }}
               >
-                <p className="text-[11px] font-medium text-white/80 leading-tight">
+                <p className="text-[11px] font-medium leading-tight" style={{ color: 'var(--text-primary)' }}>
                   {rel.col_a} ↔ {rel.col_b}
                 </p>
-                <p className="text-[10px] text-white/30 mt-0.5 leading-tight truncate">
+                <p className="text-[10px] mt-0.5 leading-tight truncate" style={{ color: 'var(--text-muted)' }}>
                   {rel.source_a.split('·')[0].trim()} · {rel.source_b.split('·')[0].trim()}
                 </p>
                 <p className={cn('text-[10px] mt-0.5 font-medium', confidenceColor(rel.confidence))}>
@@ -113,13 +121,13 @@ export function Sidebar({ onFiles }: SidebarProps) {
         {/* Quality issues */}
         {highIssues.length > 0 && (
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 flex items-center gap-1">
+            <p className="text-[10px] font-semibold uppercase tracking-widest flex items-center gap-1" style={{ color: 'var(--text-faint)' }}>
               <AlertTriangle size={10} /> Alertas de calidad
             </p>
             {highIssues.map((issue, i) => (
-              <div key={i} className="bg-red-500/[0.07] border border-red-500/20 rounded-lg px-3 py-2">
-                <p className="text-[11px] font-medium text-red-400">{issue.column}</p>
-                <p className="text-[10px] text-white/40 mt-0.5">{issue.detail}</p>
+              <div key={i} className="rounded-lg px-3 py-2" style={{ background: '#fff5f5', border: '1px solid #fecaca' }}>
+                <p className="text-[11px] font-medium text-red-600">{issue.column}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{issue.detail}</p>
               </div>
             ))}
           </div>

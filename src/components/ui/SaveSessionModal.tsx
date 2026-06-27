@@ -20,44 +20,58 @@ export function SaveSessionModal({ onSave, onSkip, onClose, files }: SaveSession
   )
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#16181d] border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}>
+      <div
+        className="w-full max-w-md p-6 rounded-2xl shadow-2xl"
+        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-[15px] font-semibold text-white">Guardar sesión</h2>
-            <p className="text-[12px] text-white/40 mt-0.5">
+            <h2 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>Guardar sesión</h2>
+            <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
               {files.length} archivo{files.length > 1 ? 's' : ''} analizados
             </p>
           </div>
-          <button onClick={onClose} className="text-white/30 hover:text-white/60 transition-colors">
+          <button
+            onClick={onClose}
+            className="transition-colors hover:text-[var(--text-secondary)]"
+            style={{ color: 'var(--text-muted)' }}
+          >
             <X size={18} />
           </button>
         </div>
 
         {/* Nombre sesión */}
         <div className="mb-4">
-          <label className="text-[11px] font-medium text-white/40 uppercase tracking-wide block mb-1.5">
+          <label className="text-[11px] font-medium uppercase tracking-wide block mb-1.5" style={{ color: 'var(--text-muted)' }}>
             Nombre de la sesión
           </label>
           <input
             value={sessionTitle}
             onChange={e => setSessionTitle(e.target.value)}
-            className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2
-              text-[13px] text-white/80 outline-none focus:border-emerald-500/40 transition-colors"
+            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none transition-colors focus:border-emerald-500/40"
+            style={{
+              background: 'var(--bg-surface-alt)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+            }}
           />
         </div>
 
         {/* Selección de proyecto */}
         <div className="mb-5">
-          <label className="text-[11px] font-medium text-white/40 uppercase tracking-wide block mb-1.5">
+          <label className="text-[11px] font-medium uppercase tracking-wide block mb-1.5" style={{ color: 'var(--text-muted)' }}>
             Proyecto
           </label>
           {projects.length === 0 ? (
-            <div className="bg-white/[0.03] border border-white/[0.07] rounded-lg px-3 py-3 text-center">
-              <FolderPlus size={16} className="mx-auto mb-1 text-white/20" />
-              <p className="text-[12px] text-white/30">No tienes proyectos aún.</p>
-              <p className="text-[11px] text-white/20">Crea uno desde el panel izquierdo primero.</p>
+            <div
+              className="rounded-lg px-3 py-3 text-center"
+              style={{ background: 'var(--bg-surface-alt)', border: '1px solid var(--border)' }}
+            >
+              <FolderPlus size={16} className="mx-auto mb-1" style={{ color: 'var(--text-faint)' }} />
+              <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>No tienes proyectos aún.</p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-faint)' }}>Crea uno desde el panel izquierdo primero.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-1.5">
@@ -65,17 +79,25 @@ export function SaveSessionModal({ onSave, onSkip, onClose, files }: SaveSession
                 <button
                   key={p.id}
                   onClick={() => setSelectedProject(p.id)}
-                  className={cn(
-                    'flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-left transition-all',
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all"
+                  style={
                     selectedProject === p.id
-                      ? 'border-emerald-500/40 bg-emerald-500/10'
-                      : 'border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.06]'
-                  )}
+                      ? { border: '1px solid rgba(16,185,129,0.35)', background: '#f0fdf8' }
+                      : { border: '1px solid var(--border)', background: 'var(--bg-surface-alt)' }
+                  }
+                  onMouseEnter={e => {
+                    if (selectedProject !== p.id)
+                      (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'
+                  }}
+                  onMouseLeave={e => {
+                    if (selectedProject !== p.id)
+                      (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface-alt)'
+                  }}
                 >
                   <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: p.color }} />
-                  <span className="text-[13px] text-white/80">{p.name}</span>
+                  <span className="text-[13px]" style={{ color: 'var(--text-primary)' }}>{p.name}</span>
                   {p.sessions && (
-                    <span className="ml-auto text-[10px] text-white/30">
+                    <span className="ml-auto text-[10px]" style={{ color: 'var(--text-faint)' }}>
                       {(p.sessions as any[]).length} sesiones
                     </span>
                   )}
@@ -89,8 +111,14 @@ export function SaveSessionModal({ onSave, onSkip, onClose, files }: SaveSession
         <div className="flex gap-2">
           <button
             onClick={onSkip}
-            className="flex-1 py-2 rounded-lg text-[13px] text-white/40 border border-white/10
-              hover:bg-white/5 transition-all"
+            className="flex-1 py-2 rounded-lg text-[13px] transition-all"
+            style={{
+              border: '1px solid var(--border)',
+              color: 'var(--text-muted)',
+              background: 'transparent',
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface-alt)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
           >
             Sin guardar
           </button>
@@ -100,9 +128,14 @@ export function SaveSessionModal({ onSave, onSkip, onClose, files }: SaveSession
             className={cn(
               'flex-1 py-2 rounded-lg text-[13px] font-medium transition-all',
               selectedProject && sessionTitle.trim() && projects.length > 0
-                ? 'bg-emerald-500 text-black hover:bg-emerald-400'
-                : 'bg-white/10 text-white/20 cursor-not-allowed'
+                ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                : 'cursor-not-allowed'
             )}
+            style={
+              !(selectedProject && sessionTitle.trim() && projects.length > 0)
+                ? { background: 'var(--bg-surface-alt)', color: 'var(--text-faint)' }
+                : {}
+            }
           >
             Guardar sesión
           </button>

@@ -57,24 +57,31 @@ export function ProjectsPanel({ onSelectSession, onNewSession }: ProjectsPanelPr
   }
 
   return (
-    <div className="w-[220px] flex-shrink-0 border-r border-white/[0.07] bg-[#0f1014] flex flex-col">
+    <div
+      className="w-[220px] flex-shrink-0 flex flex-col"
+      style={{ background: 'var(--bg-panel)', borderRight: '1px solid var(--border)' }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07]">
-        <span className="text-[11px] font-semibold uppercase tracking-widest text-white/30">
+      <div
+        className="flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
+        <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>
           Proyectos
         </span>
         <button
           onClick={() => setCreating(true)}
-          className="w-6 h-6 rounded flex items-center justify-center text-white/30 hover:text-emerald-400 hover:bg-white/5 transition-all"
+          className="w-6 h-6 rounded flex items-center justify-center transition-all hover:bg-[var(--bg-surface-alt)] hover:text-emerald-600"
+          style={{ color: 'var(--text-muted)' }}
           title="Nuevo proyecto"
         >
           <Plus size={14} />
         </button>
       </div>
 
-      {/* Nueva proyecto input */}
+      {/* Nuevo proyecto input */}
       {creating && (
-        <div className="px-3 py-2 border-b border-white/[0.07]">
+        <div className="px-3 py-2" style={{ borderBottom: '1px solid var(--border)' }}>
           <input
             autoFocus
             value={newName}
@@ -84,20 +91,25 @@ export function ProjectsPanel({ onSelectSession, onNewSession }: ProjectsPanelPr
               if (e.key === 'Escape') { setCreating(false); setNewName('') }
             }}
             placeholder="Nombre del proyecto..."
-            className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-2.5 py-1.5
-              text-[12px] text-white/80 placeholder:text-white/25 outline-none
-              focus:border-emerald-500/40"
+            className="w-full rounded-lg px-2.5 py-1.5 text-[12px] outline-none focus:border-emerald-500/40 transition-colors"
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+            }}
           />
           <div className="flex gap-1.5 mt-1.5">
             <button
               onClick={handleCreate}
-              className="flex-1 text-[11px] py-1 rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-all"
+              className="flex-1 text-[11px] py-1 rounded text-emerald-700 hover:bg-emerald-100 transition-all"
+              style={{ background: '#ecfdf5', border: '1px solid #a7f3d0' }}
             >
               Crear
             </button>
             <button
               onClick={() => { setCreating(false); setNewName('') }}
-              className="flex-1 text-[11px] py-1 rounded bg-white/5 text-white/30 hover:bg-white/10 transition-all"
+              className="flex-1 text-[11px] py-1 rounded transition-all hover:bg-[var(--bg-surface)]"
+              style={{ background: 'var(--bg-surface-alt)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
             >
               Cancelar
             </button>
@@ -108,13 +120,13 @@ export function ProjectsPanel({ onSelectSession, onNewSession }: ProjectsPanelPr
       {/* Lista proyectos */}
       <div className="flex-1 overflow-y-auto py-2">
         {loading && (
-          <p className="text-[11px] text-white/25 px-4 py-3">Cargando...</p>
+          <p className="text-[11px] px-4 py-3" style={{ color: 'var(--text-faint)' }}>Cargando...</p>
         )}
         {!loading && projects.length === 0 && (
           <div className="px-4 py-6 text-center">
-            <FolderOpen size={20} className="mx-auto mb-2 text-white/15" />
-            <p className="text-[11px] text-white/25">Sin proyectos aún</p>
-            <p className="text-[10px] text-white/15 mt-1">Haz clic en + para crear uno</p>
+            <FolderOpen size={20} className="mx-auto mb-2" style={{ color: 'var(--text-faint)' }} />
+            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Sin proyectos aún</p>
+            <p className="text-[10px] mt-1" style={{ color: 'var(--text-faint)' }}>Haz clic en + para crear uno</p>
           </div>
         )}
 
@@ -122,28 +134,37 @@ export function ProjectsPanel({ onSelectSession, onNewSession }: ProjectsPanelPr
           <div key={project.id}>
             {/* Proyecto row */}
             <div
-              className={cn(
-                'flex items-center gap-2 px-3 py-2 cursor-pointer group transition-colors',
-                activeProjectId === project.id ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
-              )}
+              className="flex items-center gap-2 px-3 py-2 cursor-pointer group transition-colors"
+              style={{
+                background: activeProjectId === project.id ? 'var(--bg-surface-alt)' : 'transparent',
+              }}
+              onMouseEnter={e => {
+                if (activeProjectId !== project.id)
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(0,0,0,0.025)'
+              }}
+              onMouseLeave={e => {
+                if (activeProjectId !== project.id)
+                  (e.currentTarget as HTMLElement).style.background = 'transparent'
+              }}
               onClick={() => {
                 setActiveProjectId(project.id)
                 toggleExpand(project.id)
               }}
             >
               <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: project.color }} />
-              <span className="flex-1 text-[12px] text-white/70 truncate font-medium">
+              <span className="flex-1 text-[12px] truncate font-medium" style={{ color: 'var(--text-secondary)' }}>
                 {project.name}
               </span>
               <button
                 onClick={e => handleDelete(project.id, e)}
-                className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all"
+                className="opacity-0 group-hover:opacity-100 transition-all hover:text-red-500"
+                style={{ color: 'var(--text-faint)' }}
               >
                 <Trash2 size={11} />
               </button>
               {expanded.has(project.id)
-                ? <ChevronDown size={11} className="text-white/20 flex-shrink-0" />
-                : <ChevronRight size={11} className="text-white/20 flex-shrink-0" />
+                ? <ChevronDown size={11} className="flex-shrink-0" style={{ color: 'var(--text-faint)' }} />
+                : <ChevronRight size={11} className="flex-shrink-0" style={{ color: 'var(--text-faint)' }} />
               }
             </div>
 
@@ -189,17 +210,25 @@ function SessionList({
   }, [projectId])
 
   return (
-    <div className="ml-4 border-l border-white/[0.06] pl-2 mb-1">
+    <div className="ml-4 pl-2 mb-1" style={{ borderLeft: '1px solid var(--border)' }}>
       {sessions.map(s => (
         <div
           key={s.id}
           onClick={() => onSelect(s.id)}
-          className={cn(
-            'flex items-center gap-1.5 px-2 py-1.5 rounded cursor-pointer transition-colors text-[11px]',
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded cursor-pointer transition-colors text-[11px]"
+          style={
             activeSessionId === s.id
-              ? 'bg-emerald-500/10 text-emerald-400'
-              : 'text-white/40 hover:text-white/60 hover:bg-white/[0.03]'
-          )}
+              ? { background: '#ecfdf5', color: '#059669' }
+              : { color: 'var(--text-muted)' }
+          }
+          onMouseEnter={e => {
+            if (activeSessionId !== s.id)
+              (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
+          }}
+          onMouseLeave={e => {
+            if (activeSessionId !== s.id)
+              (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'
+          }}
         >
           <MessageSquare size={10} className="flex-shrink-0" />
           <span className="truncate">{s.title}</span>
@@ -207,8 +236,8 @@ function SessionList({
       ))}
       <button
         onClick={onNew}
-        className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] text-white/20
-          hover:text-emerald-400 transition-colors w-full"
+        className="flex items-center gap-1.5 px-2 py-1.5 text-[11px] transition-colors w-full hover:text-emerald-600"
+        style={{ color: 'var(--text-faint)' }}
       >
         <Plus size={10} />
         Nueva sesión

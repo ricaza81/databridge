@@ -41,15 +41,21 @@ export function ChatInput({ onSend, onAttach }: ChatInputProps) {
   const canSend = !!value.trim() && !isStreaming
 
   return (
-    <div className="px-6 pb-5 pt-3 border-t border-white/[0.07] bg-[#13151a] flex-shrink-0">
-      <div className={cn(
-        'flex items-end gap-2 bg-white/[0.04] border rounded-xl px-3 py-2.5 transition-colors duration-200',
-        'border-white/[0.08]',
-        'focus-within:border-emerald-500/40'
-      )}>
+    <div
+      className="px-6 pb-5 pt-3 flex-shrink-0"
+      style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border)' }}
+    >
+      <div
+        className={cn(
+          'flex items-end gap-2 rounded-xl px-3 py-2.5 transition-colors duration-200 shadow-sm',
+          'focus-within:ring-2 focus-within:ring-emerald-500/25 focus-within:border-emerald-500/40'
+        )}
+        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
+      >
         <button
           onClick={onAttach}
-          className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all flex-shrink-0"
+          className="p-1.5 rounded-lg transition-all flex-shrink-0 hover:bg-[var(--bg-surface-alt)]"
+          style={{ color: 'var(--text-muted)' }}
           title="Adjuntar archivo"
         >
           <Paperclip size={16} />
@@ -61,9 +67,8 @@ export function ChatInput({ onSend, onAttach }: ChatInputProps) {
           onChange={handleInput}
           onKeyDown={handleKey}
           placeholder="Describe qué quieres analizar o sube un archivo para comenzar..."
-          className="flex-1 bg-transparent border-none outline-none text-[14px] text-white/85
-            placeholder:text-white/25 resize-none leading-relaxed min-h-[22px] max-h-[140px]
-            font-sans py-0.5"
+          className="flex-1 bg-transparent border-none outline-none text-[14px] resize-none leading-relaxed min-h-[22px] max-h-[140px] font-sans py-0.5"
+          style={{ color: 'var(--text-primary)' }}
           rows={1}
         />
 
@@ -73,14 +78,15 @@ export function ChatInput({ onSend, onAttach }: ChatInputProps) {
           className={cn(
             'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all',
             canSend
-              ? 'bg-emerald-500 text-black hover:bg-emerald-400 hover:scale-105 cursor-pointer'
-              : 'bg-white/[0.08] text-white/20 cursor-not-allowed'
+              ? 'bg-emerald-500 text-white hover:bg-emerald-600 hover:scale-105 cursor-pointer'
+              : 'cursor-not-allowed'
           )}
+          style={!canSend ? { background: 'var(--bg-surface-alt)', color: 'var(--text-faint)' } : {}}
         >
           <ArrowUp size={16} />
         </button>
       </div>
-      <p className="text-[11px] text-white/20 text-center mt-2">
+      <p className="text-[11px] text-center mt-2" style={{ color: 'var(--text-faint)' }}>
         Enter para enviar · Shift+Enter para nueva línea
       </p>
     </div>

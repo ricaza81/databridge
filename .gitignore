@@ -153,3 +153,5 @@ uploads/
 
 # Env con credenciales
 .env.local
+
+.vercel
