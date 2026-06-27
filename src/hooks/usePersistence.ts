@@ -10,18 +10,22 @@ export function usePersistence() {
   // ── Proyectos ────────────────────────────────────────────────────────────
 
   async function getProjects() {
+    const { data: { user } } = await db.auth.getUser()
+    if (!user) return []
     const { data, error } = await db
       .from('projects')
       .select('*, sessions(id, title, updated_at)')
+      .eq('user_id', user.id)
       .order('updated_at', { ascending: false })
     if (error) throw error
     return data
   }
 
   async function createProject(name: string, description?: string) {
+    const { data: { user } } = await db.auth.getUser()
     const { data, error } = await db
       .from('projects')
-      .insert({ name, description })
+      .insert({ name, description, user_id: user?.id })
       .select()
       .single()
     if (error) throw error

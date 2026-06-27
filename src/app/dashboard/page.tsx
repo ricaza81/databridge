@@ -8,8 +8,10 @@ import { Sidebar } from '@/components/sidebar/Sidebar'
 import { ChatWindow } from '@/components/chat/ChatWindow'
 import { ChatInput } from '@/components/chat/ChatInput'
 import { SaveSessionModal } from '@/components/ui/SaveSessionModal'
+import { AuthModal } from '@/components/ui/AuthModal'
 import { useStore } from '@/store'
 import { useSession } from '@/hooks/useSession'
+import { useAuth } from '@/hooks/useAuth'
 import { usePersistence } from '@/hooks/usePersistence'
 import { streamChat, uploadFiles, checkHealth } from '@/lib/api'
 import { ChatMessage } from '@/types'
@@ -22,8 +24,10 @@ export default function DashboardPage() {
     analysisReady, addFile, updateFileStatus, analysis, files,
     messages, setMessages, clearMessages, clearFiles,
     activeProjectId, activeDbSessionId, setActiveDbSessionId,
-    setAnalysis, setAnalysisReady, projects,
+    setAnalysis, setAnalysisReady, projects, user,
   } = useStore()
+
+  useAuth()
 
   const fileRef = useRef<HTMLInputElement>(null)
   const [backendOk, setBackendOk] = useState<boolean | null>(null)
@@ -31,6 +35,8 @@ export default function DashboardPage() {
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<string[]>([])
   const lastMsgId = useRef<string | null>(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const pendingUpload = useRef<File[]>([])
 
   useEffect(() => {
     checkHealth().then(ok => setBackendOk(ok))
@@ -137,7 +143,7 @@ export default function DashboardPage() {
     autoAnalyzed.current = false
   }
 
-  async function handleFiles(incoming: File[]) {
+  async function processUpload(incoming: File[]) {
     if (!sessionId) {
       alert('El backend no está disponible. Verifica que backend_main.py esté corriendo.')
       return
@@ -150,6 +156,22 @@ export default function DashboardPage() {
     } catch (e) {
       incoming.forEach(f => updateFileStatus(f.name, 'error'))
     }
+  }
+
+  function handleFiles(incoming: File[]) {
+    if (!user) {
+      pendingUpload.current = incoming
+      setShowAuthModal(true)
+      return
+    }
+    processUpload(incoming)
+  }
+
+  function handleAuthSuccess() {
+    setShowAuthModal(false)
+    const queued = pendingUpload.current
+    pendingUpload.current = []
+    if (queued.length > 0) processUpload(queued)
   }
 
   return (
@@ -176,6 +198,13 @@ export default function DashboardPage() {
           onSave={handleSaveSession}
           onSkip={() => setShowSaveModal(false)}
           onClose={() => setShowSaveModal(false)}
+        />
+      )}
+
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => { setShowAuthModal(false); pendingUpload.current = [] }}
+          onSuccess={handleAuthSuccess}
         />
       )}
 

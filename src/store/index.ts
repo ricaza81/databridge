@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { User } from '@supabase/supabase-js'
 import { Analysis, ChatMessage, UploadedFile } from '@/types'
 
 export interface Project {
@@ -55,6 +56,10 @@ interface DataBridgeStore {
   setMessages: (msgs: ChatMessage[]) => void
   clearMessages: () => void
 
+  // Auth
+  user: User | null
+  setUser: (user: User | null) => void
+
   // UI
   isStreaming: boolean
   setStreaming: (v: boolean) => void
@@ -99,6 +104,9 @@ export const useStore = create<DataBridgeStore>((set) => ({
     }),
   setMessages: (msgs) => set({ messages: msgs }),
   clearMessages: () => set({ messages: [] }),
+
+  user: null,
+  setUser: (user) => set({ user }),
 
   isStreaming: false,
   setStreaming: (v) => set({ isStreaming: v }),

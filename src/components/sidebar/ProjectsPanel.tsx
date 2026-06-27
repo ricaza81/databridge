@@ -12,7 +12,7 @@ interface ProjectsPanelProps {
 }
 
 export function ProjectsPanel({ onSelectSession, onNewSession }: ProjectsPanelProps) {
-  const { projects, setProjects, addProject, removeProject, activeProjectId, setActiveProjectId, activeDbSessionId } = useStore()
+  const { projects, setProjects, addProject, removeProject, activeProjectId, setActiveProjectId, activeDbSessionId, user } = useStore()
   const db = usePersistence()
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [creating, setCreating] = useState(false)
@@ -20,11 +20,17 @@ export function ProjectsPanel({ onSelectSession, onNewSession }: ProjectsPanelPr
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!user) {
+      setProjects([])
+      setLoading(false)
+      return
+    }
+    setLoading(true)
     db.getProjects()
       .then(setProjects)
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [])
+  }, [user?.id])
 
   function toggleExpand(id: string) {
     setExpanded(prev => {
