@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Mail, Lock, Loader2 } from 'lucide-react'
+import { X, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 
@@ -14,14 +14,16 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
   const [tab, setTab] = useState<'signup' | 'login'>('signup')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [resettingPassword, setResettingPassword] = useState(false)
   const [error, setError] = useState('')
-  const [confirmMsg, setConfirmMsg] = useState('')
+  const [infoMsg, setInfoMsg] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    setConfirmMsg('')
+    setInfoMsg('')
     setLoading(true)
     const supabase = createClient()
 
@@ -33,7 +35,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
         if (session) {
           onSuccess()
         } else {
-          setConfirmMsg('Revisa tu email para confirmar tu cuenta y luego inicia sesión.')
+          setInfoMsg('Revisa tu email para confirmar tu cuenta y luego inicia sesión.')
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -44,6 +46,28 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
       setError((err as Error).message ?? 'Error de autenticación')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleForgotPassword() {
+    if (!email) {
+      setError('Ingresa tu email primero.')
+      return
+    }
+    setError('')
+    setInfoMsg('')
+    setResettingPassword(true)
+    const supabase = createClient()
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/dashboard',
+      })
+      if (error) throw error
+      setInfoMsg('Te enviamos un enlace para restablecer tu contraseña.')
+    } catch (err: unknown) {
+      setError((err as Error).message ?? 'Error al enviar el email')
+    } finally {
+      setResettingPassword(false)
     }
   }
 
@@ -60,7 +84,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
   function switchTab(t: 'signup' | 'login') {
     setTab(t)
     setError('')
-    setConfirmMsg('')
+    setInfoMsg('')
   }
 
   return (
@@ -72,7 +96,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
       />
 
       <div
-        className="relative w-full max-w-[380px] mx-4 rounded-2xl shadow-2xl p-7"
+        className="relative w-full max-w-[390px] mx-4 rounded-2xl shadow-2xl p-7"
         style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
       >
         <button
@@ -94,10 +118,8 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           >
             {tab === 'login' ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
           </h2>
-          <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
-            {tab === 'login'
-              ? 'Inicia sesión para continuar con tu proyecto'
-              : 'Guarda y organiza tus proyectos de datos'}
+          <p className="text-[12px] mt-1.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            Para guardar tus archivos y proyectos<br />necesitas una cuenta gratuita.
           </p>
         </div>
 
@@ -123,6 +145,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          {/* Email */}
           <div className="relative">
             <Mail
               size={14}
@@ -146,6 +169,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
             />
           </div>
 
+          {/* Contraseña con toggle */}
           <div className="relative">
             <Lock
               size={14}
@@ -153,13 +177,13 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
               style={{ color: 'var(--text-muted)' }}
             />
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Contraseña (mín. 6 caracteres)"
               required
               minLength={6}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl text-[13px] outline-none"
+              className="w-full pl-9 pr-10 py-2.5 rounded-xl text-[13px] outline-none"
               style={{
                 background: 'var(--bg-base)',
                 border: '1px solid var(--border)',
@@ -168,16 +192,40 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
               onFocus={e => (e.currentTarget.style.borderColor = 'rgba(16,185,129,0.5)')}
               onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(v => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded transition-colors hover:bg-[var(--bg-surface-alt)]"
+              style={{ color: 'var(--text-muted)' }}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
           </div>
+
+          {/* Link olvidé contraseña — solo en login */}
+          {tab === 'login' && (
+            <div className="flex justify-end -mt-1">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={resettingPassword}
+                className="text-[11px] transition-colors hover:text-emerald-600 disabled:opacity-50"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                {resettingPassword ? 'Enviando...' : '¿Olvidaste tu contraseña?'}
+              </button>
+            </div>
+          )}
 
           {error && (
             <p className="text-[12px] px-3 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200">
               {error}
             </p>
           )}
-          {confirmMsg && (
+          {infoMsg && (
             <p className="text-[12px] px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
-              {confirmMsg}
+              {infoMsg}
             </p>
           )}
 
@@ -200,12 +248,14 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           </button>
         </form>
 
+        {/* Divider */}
         <div className="flex items-center gap-3 my-4">
           <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
           <span className="text-[11px]" style={{ color: 'var(--text-faint)' }}>o continúa con</span>
           <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
         </div>
 
+        {/* Google */}
         <button
           onClick={handleGoogle}
           className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-colors"
@@ -221,6 +271,14 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           </svg>
           Google
         </button>
+
+        {/* Pie de términos */}
+        <p className="text-center text-[10px] mt-4 leading-relaxed" style={{ color: 'var(--text-faint)' }}>
+          Al continuar aceptas los{' '}
+          <span className="underline cursor-pointer hover:text-emerald-600 transition-colors">Términos de uso</span>
+          {' '}y la{' '}
+          <span className="underline cursor-pointer hover:text-emerald-600 transition-colors">Política de privacidad</span>.
+        </p>
       </div>
     </div>
   )
